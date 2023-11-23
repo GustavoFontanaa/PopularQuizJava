@@ -78,12 +78,11 @@ public class Server {
 
 	private static void handleIncorrectChoice(String clientChoice, Quiz quiz, PrintWriter output) {
 		if (attempts.intValue() == 1) {
-			output.println("Resultado: Tentativas Esgotadas");
-			// arrumar bug de responder s ou n e ter que apertar enter 2x para poder funcionar
+		    output.println("Resultado: Tentativas Esgotadas");
+		} else {
+			String equalsChar = findCommonCharacters(quiz.getPalavra().trim(), clientChoice.trim());
+			output.println("Resultado: " + formatString(equalsChar, " - ") + "Tentativas: " + attempts.decrementAndGet());
 		}
-
-		String equalsChar = findCommonCharacters(quiz.getPalavra().trim(), clientChoice.trim());
-		output.println("Resultado: " + formatString(equalsChar, " - ") + ", Tentativas: " + attempts.decrementAndGet());
 	}
 
 	private static String findCommonCharacters(String str1, String str2) {

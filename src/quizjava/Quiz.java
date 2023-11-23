@@ -17,7 +17,7 @@ public class Quiz {
 	public String getRandomHint() {
 		Map.Entry<String, String> randomEntry = pickRandomEntry(wordsAndHints);
 		palavra = randomEntry.getKey();
-		return "Dica: " + randomEntry.getValue();
+		return "Pergunta: " + randomEntry.getValue();
 	}
 
 	public String getPalavra() {

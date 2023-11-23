@@ -41,16 +41,15 @@ public class ClientSide {
         String responseData = findAfterFirstSemicolon(response).trim();
 
         switch (responseType) {
-            case "Dica":
+            case "Pergunta":
                 System.out.println(response);
-                System.out.println("Digite a palavra abaixo:");
                 break;
             case "Resultado":
                 if (responseData.equals("correta") || responseData.equals("Tentativas Esgotadas")) {
                     System.out.println(responseData + "!");
-                    System.out.println("Jogar novamente? (s/n)");
+                    System.out.println("Novo Jogo? (s/n)");
                 } else {
-                    System.out.println("Contem: " + responseData);
+                    System.out.println(responseData);
                 }
                 break;
             default:
