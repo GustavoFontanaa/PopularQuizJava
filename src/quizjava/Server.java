@@ -52,7 +52,7 @@ public class Server {
 					System.out.println();
 					System.out.println();
 					attempts.set(5);
-					output.println(getRandomChoice(quiz));
+					output.println(getChoice(quiz));
 					continue;
 				}
 
@@ -118,7 +118,7 @@ public class Server {
 		return formatted.toString();
 	}
 
-	private static String getRandomChoice(Quiz quiz) {
+	private static String getChoice(Quiz quiz) {
 		return quiz.getRandomHint();
 	}
 
