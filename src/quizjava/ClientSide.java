@@ -47,7 +47,7 @@ public class ClientSide {
             case "Resultado":
                 if (responseData.equals("correta") || responseData.equals("Tentativas Esgotadas")) {
                     System.out.println(responseData + "!");
-                    System.out.println("Novo Jogo? (s/n)");
+                    System.out.println("Continuar? (s/n)");
                 } else {
                     System.out.println(responseData);
                 }

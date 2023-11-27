@@ -81,7 +81,7 @@ public class Server {
 		    output.println("Resultado: Tentativas Esgotadas");
 		} else {
 			String equalsChar = findCommonCharacters(quiz.getPalavra().trim(), clientChoice.trim());
-			output.println("Resultado: " + formatString(equalsChar, " - ") + "Tentativas: " + attempts.decrementAndGet());
+			output.println("Resultado: " + formatString(equalsChar, " - ") + " Tentativas: " + attempts.decrementAndGet());
 		}
 	}
 
