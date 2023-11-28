@@ -26,8 +26,6 @@ public class Quiz {
 
 	private void initializeWordsAndHints() {
 		wordsAndHints = new HashMap<>();
-		wordsAndHints.put("artorias", "(Série souls) Exímio espadachim e que foi um dos poucos que ousaram enfrentar a imponente ameaça do Abismo!");
-	    wordsAndHints.put("200", "Qual é o dano da spas?");
 	    wordsAndHints.put("gandalf", "(Senhor dos Anéis) Poderoso mago que liderou a Sociedade do Anel na jornada para destruir o Um Anel.");
 	    wordsAndHints.put("mario", "(Jogo clássico) Encanador da Nintendo conhecido por resgatar a Princesa Peach do vilão Bowser.");
 	    wordsAndHints.put("python", "(Linguagem de programação) Conhecida por sua sintaxe limpa e legibilidade, é muito utilizada em diversos campos.");
