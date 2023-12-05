@@ -13,7 +13,7 @@ public class Run {
             e.printStackTrace();
         }
 
-        new Thread(() -> ClientSide.start("localhost", Integer.valueOf(port))).start();
+        new Thread(() -> ClientSide.start("192.168.0.108", Integer.valueOf(port))).start();
     }
 }
 

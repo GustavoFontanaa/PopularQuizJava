@@ -5,130 +5,126 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.Normalizer;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class Server {
 
-	static private AtomicInteger attempts = new AtomicInteger(5);
+    private static final AtomicInteger attempts = new AtomicInteger(5);
 
-	BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
+    public static void start(int port, Quiz quiz) {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Aguardando conexões...");
+            Socket clientSocket = serverSocket.accept();
+            initializeClientConnection(clientSocket, quiz);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	public static void start(Integer port, Quiz quiz) {
-		try (ServerSocket serverSocket = new ServerSocket(port)) {
-			System.out.println("Aguardando conexões...");
-			Socket clientSocket = serverSocket.accept();
-			System.out.println("Conectado ao servidor.");
-			System.out.println("Cliente conectado: " + clientSocket.getInetAddress().getHostAddress() + "\n");
-			System.out.println("Para iniciar digite: 'start'");
+    private static void initializeClientConnection(Socket clientSocket, Quiz quiz) {
+        try {
+            System.out.println("Conectado ao servidor.");
+            System.out.println("Cliente conectado: " + clientSocket.getInetAddress().getHostAddress() + "\n");
+            System.out.println("Para iniciar digite: 'start'");
 
-			new Thread(() -> handleClient(clientSocket, quiz)).start();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            new Thread(() -> handleClient(clientSocket, quiz)).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	private static void handleClient(Socket clientSocket, Quiz quiz) {
-		try {
-			BufferedReader input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
+    private static void handleClient(Socket clientSocket, Quiz quiz) {
+        try (
+            BufferedReader input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true)
+        ) {
+            while (true) {
+                String clientChoice = input.readLine();
 
-			while (true) {
-				String clientChoice = input.readLine();
+                if (clientChoice == null) {
+                    break;
+                }
 
-				if (clientChoice == null) {
-					break;
-				}
+                if (clientChoice.equalsIgnoreCase("n")) {
+                    handleClientExit();
+                    break;
+                }
 
-				if (clientChoice.equals("n")) {
-					System.out.println("Cliente escolheu sair. Encerrando o jogo.");
-					System.exit(1);
-					break;
-				}
+                if ("start".equalsIgnoreCase(clientChoice) || "s".equalsIgnoreCase(clientChoice)) {
+                    handleStartCommand(quiz, output);
+                } else {
+                    processClientChoice(clientChoice, quiz, output);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-				if ("start".equals(clientChoice) || "s".equals(clientChoice)) {
-					System.out.println();
-					System.out.println();
-					attempts.set(5);
-					output.println(getChoice(quiz));
-					continue;
-				}
+    private static void handleStartCommand(Quiz quiz, PrintWriter output) {
+        System.out.println();
+        System.out.println();
+        attempts.set(5);
+        output.println(getChoice(quiz));
+    }
 
-				processClientChoice(clientChoice, quiz, output);
-			}
+    private static void processClientChoice(String clientChoice, Quiz quiz, PrintWriter output) {
+        if (quiz.checkAnswer(clientChoice)) {
+            attempts.set(5);
+            output.println("Resultado: correta");
+        } else {
+            handleIncorrectChoice(clientChoice, quiz, output);
+        }
+    }
 
-			input.close();
-			output.close();
-			clientSocket.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
-	private static void processClientChoice(String clientChoice, Quiz quiz, PrintWriter output) {
-		if (removeSpecialCaracters(quiz.getPalavra()).equals(removeSpecialCaracters(clientChoice))) {
-			attempts.set(5);
-			output.println("Resultado: correta");
-		} else {
-			handleIncorrectChoice(clientChoice, quiz, output);
-		}
-	}
+    private static void handleIncorrectChoice(String clientChoice, Quiz quiz, PrintWriter output) {
+        if (attempts.intValue() == 1) {
+            output.println("Resultado: Tentativas Esgotadas");
+        } else {
+            String equalsChar = findCommonCharacters(quiz.getCurrentAnswer().trim(), clientChoice.trim());
+            output.println("Resultado: " + formatString(equalsChar, " - ") + " Tentativas: " + attempts.decrementAndGet());
+        }
+    }
 
-	private static void handleIncorrectChoice(String clientChoice, Quiz quiz, PrintWriter output) {
-		if (attempts.intValue() == 1) {
-		    output.println("Resultado: Tentativas Esgotadas");
-		} else {
-			String equalsChar = findCommonCharacters(quiz.getPalavra().trim(), clientChoice.trim());
-			output.println("Resultado: " + formatString(equalsChar, " - ") + " Tentativas: " + attempts.decrementAndGet());
-		}
-	}
+    private static String findCommonCharacters(String str1, String str2) {
+        Set<Character> commonChars = new HashSet<>();
 
-	private static String findCommonCharacters(String str1, String str2) {
-		Set<Character> commonChars = new HashSet<>();
+        if (str1.isEmpty() || str2.isEmpty()) {
+            return "";
+        }
 
-		if (str1.isEmpty() || str2.isEmpty()) {
-			return "";
-		}
+        str1.chars().mapToObj(c -> (char) c)
+                .filter(c -> str2.indexOf(c) != -1)
+                .forEach(commonChars::add);
 
-		for (char c : str1.toCharArray()) {
-			if (str2.indexOf(c) != -1) {
-				commonChars.add(c);
-			}
-		}
+        return commonChars.stream().map(Object::toString).collect(Collectors.joining(""));
+    }
 
-		return commonChars.stream().map(Object::toString).collect(Collectors.joining(""));
-	}
+    private static String formatString(String input, String delimiter) {
+        StringBuilder formatted = new StringBuilder();
 
-	private static String formatString(String input, String delimiter) {
-		StringBuilder formatted = new StringBuilder();
+        if (input.isEmpty()) {
+            return formatted.toString();
+        }
 
-		if (input.isEmpty()) {
-			return formatted.toString();
-		}
+        input.chars().mapToObj(c -> (char) c)
+                .map(String::valueOf)
+                .reduce((s1, s2) -> s1 + delimiter + s2)
+                .ifPresent(formatted::append);
 
-		formatted.append(input.charAt(0));
+        return formatted.toString();
+    }
 
-		for (int i = 1; i < input.length(); i++) {
-			formatted.append(delimiter).append(input.charAt(i));
-		}
+    private static String getChoice(Quiz quiz) {
+        return quiz.getRandomHint();
+    }
 
-		return formatted.toString();
-	}
-
-	private static String getChoice(Quiz quiz) {
-		return quiz.getRandomHint();
-	}
-
-	private static String removeSpecialCaracters(String text) {
-		if (text == null) {
-			return "";
-		}
-
-		text = text.replaceAll("\\s", "");
-
-		return Normalizer.normalize(text, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
-	}
-
+    private static void handleClientExit() {
+        System.out.println("Cliente escolheu sair. Encerrando o jogo.");
+        System.exit(1);
+    }
 }

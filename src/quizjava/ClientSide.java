@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class ClientSide {
+
     private static final String DELIMITER = ":";
 
     public static void start(String host, int port) {
